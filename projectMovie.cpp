@@ -37,6 +37,7 @@ struct Movie {
 
 struct Node {
     Movie data;
+    Node* prev;
     Node* next;
 };
 
@@ -44,6 +45,8 @@ Node *head = NULL;
 Node *tail = NULL;
 
 void menu_admin();
+
+void menu_user();
 
 void next_menu(string nama_menu){
     char next;
@@ -75,22 +78,6 @@ void sign_up_user(){
 
     cout << "account created" << endl;
     cout << endl;
-}
-
-void sign_up_admin(){
-    akun_admin *baru = new akun_admin;
-
-    cout << "SIGN UP FIRST YA (AS A ADMIN)" << endl;
-    cout << "username : ";
-    cin >> baru->username;
-    cout << "password : ";
-    cin >> baru->password;
-
-    FILE *file = fopen("akun_admin.txt", "a");
-    fprintf(file, "%s %s\n", baru->username.c_str(), baru->password.c_str());
-    fclose(file);
-    
-    cout << "account created" << endl << endl;
 }
 
 void login_user(){
@@ -155,6 +142,22 @@ void login_user(){
         }
         
     } while (!match);
+}
+
+void sign_up_admin(){
+    akun_admin *baru = new akun_admin;
+
+    cout << "SIGN UP FIRST YA (AS A ADMIN)" << endl;
+    cout << "username : ";
+    cin >> baru->username;
+    cout << "password : ";
+    cin >> baru->password;
+
+    FILE *file = fopen("akun_admin.txt", "a");
+    fprintf(file, "%s %s\n", baru->username.c_str(), baru->password.c_str());
+    fclose(file);
+    
+    cout << "account created" << endl << endl;
 }
 
 void login_admin(){
@@ -258,10 +261,12 @@ void tambah_film(){
         cin >> baru->data.rating;
 
         baru->next = NULL;
+        baru->prev = NULL;
     
         if(head == NULL){
             head = tail = baru;
         } else {
+            baru->prev = tail;
             tail->next = baru;
             tail = baru;
         }
@@ -301,22 +306,23 @@ void load_data_film(){
         baru->data.judul = judul;
         baru->data.genre = genre;
         baru->data.rating = rating;
+
+        baru->prev = NULL;
         baru->next = NULL;
 
         if(head == NULL){
             head = tail = baru;
         } else {
+            baru->prev = tail;
             tail->next = baru;
             tail = baru;
 
         }
     }
-
     fclose(load);
 }
 
 void tampil_film(){
-    load_data_film();
     hitung_jumlah_film();
 
     Node *temp = head;
@@ -348,16 +354,38 @@ void tampil_film(){
     }
 }
 
-void bubble_sort(){
+void bubble_sort(int pilihan){
     Node *i, *j;
     Movie temp;
 
-    for(i = head; i != NULL; i = i->next){
-        for(j = i->next; j != NULL; j = j->next){
-            if(i->data.rating > j->data.rating){
-                temp = i->data;
-                i->data = j->data;
-                j->data = temp;
+    if (pilihan == 1){
+        for(i = head; i != NULL; i = i->next){
+            for(j = i->next; j != NULL; j = j->next){
+                if(i->data.judul > j->data.judul){
+                    temp = i->data;
+                    i->data = j->data;
+                    j->data = temp;
+                }
+            }
+        }
+    } else if (pilihan == 2){
+        for(i = head; i != NULL; i = i->next){
+            for(j = i->next; j != NULL; j = j->next){
+                if(i->data.genre > j->data.genre){
+                    temp = i->data;
+                    i->data = j->data;
+                    j->data = temp;
+                }
+            }
+        }
+    } else if (pilihan == 3){
+        for(i = head; i != NULL; i = i->next){
+            for(j = i->next; j != NULL; j = j->next){
+                if(i->data.rating > j->data.rating){
+                    temp = i->data;
+                    i->data = j->data;
+                    j->data = temp;
+                }
             }
         }
     }
@@ -370,25 +398,53 @@ Node* getTail(Node* cur){
     return cur;
 }
 
-Node* partition(Node* low, Node* high){
-    float pivot = high->data.rating;
-    Node* i = low;
-
-    for(Node* j = low; j != high; j = j->next){
-        if(j->data.rating >= pivot){
-            swap(i->data, j->data);
-            i = i->next;
+Node* partition(int pilihan_sort, Node* low, Node* high){
+    if (pilihan_sort == 1){
+        string pivot = high->data.judul;
+        Node* i = low;
+    
+        for(Node* j = low; j != high; j = j->next){
+            if(j->data.judul >= pivot){
+                swap(i->data, j->data);
+                i = i->next;
+            }
         }
+        swap(i->data, high->data);
+        return i;
+
+    } else if (pilihan_sort == 2){
+        string pivot = high->data.genre;
+        Node* i = low;
+    
+        for(Node* j = low; j != high; j = j->next){
+            if(j->data.genre >= pivot){
+                swap(i->data, j->data);
+                i = i->next;
+            }
+        }
+        swap(i->data, high->data);
+        return i;
+
+    } else if (pilihan_sort == 3){
+        float pivot = high->data.rating;
+        Node* i = low;
+    
+        for(Node* j = low; j != high; j = j->next){
+            if(j->data.rating >= pivot){
+                swap(i->data, j->data);
+                i = i->next;
+            }
+        }
+        swap(i->data, high->data);
+        return i;
     }
-    swap(i->data, high->data);
-    return i;
 }
 
-void quickSort(Node* low, Node* high){
+void quickSort(int pilihan_sort, Node* low, Node* high){
     if(high != NULL && low != high && low != high->next){
-        Node* p = partition(low, high);
-        quickSort(low, p);
-        quickSort(p->next, high);
+        Node* p = partition(pilihan_sort, low, high);
+        quickSort(pilihan_sort, low, p->prev);
+        quickSort(pilihan_sort, p->next, high);
     }
 }
 
@@ -428,29 +484,75 @@ void hapus_film(){
     cout << "Masukkan ID film yang ingin dihapus: ";
     cin >> id;
 
-    Node *temp = head, *prev = NULL;
-
-    if(temp != NULL && temp->data.id == id){
-        head = temp->next;
-        delete temp;
-        cout << "Data berhasil dihapus!\n\n";
-        return;
-    }
+    Node *temp = head
+    // *prev = NULL
+    ;
 
     while(temp != NULL && temp->data.id != id){
-        prev = temp;
         temp = temp->next;
     }
-
+    
     if(temp == NULL){
         cout << "Data tidak ditemukan!\n\n";
         return;
     }
 
-    prev->next = temp->next;
-    delete temp;
+    if(temp->prev != NULL){
+        temp->prev->next = temp->next;
+    } else {
+        head = temp->next;
+    }
 
+    if(temp->next != NULL){
+        temp->next->prev = temp->prev;
+    } else {
+        tail = temp->prev;
+    }
+    
+    delete temp;
     cout << "Data berhasil dihapus!\n\n";
+}
+
+void menu_user(){
+    int pilihan, pilih_sort, pilih_asc_dsc;
+
+    do{
+        cout << "\n=== MENU USER ===\n";
+        cout << "1. List Film\n";
+        cout << "2. Rekomendasi Film\n";
+        cout << "3. Watchlist\n";
+        cout << "4. Hapus Film\n";
+        cout << "5. Logout\n";
+        cout << "Pilihan: ";
+        cin >> pilihan;
+
+        if(pilihan == 1){
+            load_data_film();
+
+            cout << "Urutkan film berdasarkan :\n";
+            cout << "1. Judul\n";
+            cout << "2. Genre\n";
+            cout << "3. Rating\n";
+            cout << "Pilihan : ";
+            cin >> pilih_sort;
+
+            cout << "\n1. Ascending\n";
+            cout << "2. Descending\n";
+            cout << "Pilihan : ";
+            cin >> pilih_asc_dsc;
+            
+            if (pilih_asc_dsc == 1){
+                bubble_sort(pilih_sort);
+                tampil_film();
+            } else if (pilih_asc_dsc == 2){
+                quickSort(pilih_sort, head, getTail(head));
+                tampil_film();
+            } else {
+                cout << "Pilihan tidak valid" << endl;
+            }
+        }
+
+    } while(pilihan != 5 || pilihan < 1 || pilihan > 5);
 }
 
 void menu_admin(){
@@ -471,15 +573,18 @@ void menu_admin(){
                 tambah_film();
                 break;
             case 2:
+                load_data_film ();
 				cout << "1.Ascending" <<endl;
 				cout << "2.Descending" << endl;
 				cout << "pilih: " ;
 				cin >> pilihsort;
 				if (pilihsort == 1) {
-					bubble_sort();
+                    pilihsort = 3;
+					bubble_sort(pilihsort);
                     tampil_film();
                 } else if (pilihsort == 2) {
-                    quickSort(head, getTail(head));
+                    pilihsort = 3;
+                    quickSort(pilihsort, head, getTail(head));
                     tampil_film();
                 } else {
                     cout << "Pilihan tidak valid";
@@ -500,7 +605,7 @@ void menu_admin(){
 
         next_menu("selanjutnya");
 
-    } while(pilihan != 5);
+    } while(pilihan != 5 || pilihan < 1 || pilihan > 5);
 }
 
 int main(){
@@ -508,7 +613,6 @@ int main(){
     char punya_akun;
     
     // pilih sebagai user atau admin
-    // pilih_karakter();
     do{
         cout << "----------------" << endl;
         cout << "- HELLO FELLAS -" << endl;
@@ -540,7 +644,7 @@ int main(){
         login_user();
 
         cout << "WELKAM, " << input_username;
-        // menu_user();
+        menu_user();
     } else if (login_as == "2"){
 
         // INI LAMAN UNTUK ADMIN 
