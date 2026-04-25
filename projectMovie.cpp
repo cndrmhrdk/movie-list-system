@@ -19,22 +19,12 @@ struct akun_admin{
 };
 
 akun_admin *head_admin = NULL;
-
-string
-    
-    input_username,
-    input_password
-;
-
-int jumlah_data_film = 0;
-
 struct Movie {
     int id;
     string judul;
     string genre;
     float rating;
 };
-
 struct Node {
     Movie data;
     Node* prev;
@@ -43,6 +33,9 @@ struct Node {
 
 Node *head = NULL;
 Node *tail = NULL;
+
+string input_username, input_password, login_as;
+int jumlah_data_film = 0;
 
 void menu_admin();
 
@@ -81,7 +74,7 @@ void sign_up_user(){
 }
 
 void login_user(){
-        bool match = false;
+    bool match = false;
     char punya_akun;
     head_user = NULL;
     
@@ -354,6 +347,60 @@ void tampil_film(){
     }
 }
 
+void rekomendasi_film(int pilihan_rekomendasi, float rating){
+    hitung_jumlah_film();
+    Node *temp = head;
+    string genre_pilihan;
+    bool cek = false;
+
+    switch(pilihan_rekomendasi){
+        case 1: genre_pilihan = "Romance"; break;
+        case 2: genre_pilihan = "Horror"; break;
+        case 3: genre_pilihan = "Sci-Fi"; break;
+        case 4: genre_pilihan = "Action"; break;
+        case 5: genre_pilihan = "Comedy"; break;
+        case 6: genre_pilihan = "Adventure"; break;
+        case 7: genre_pilihan = "Music"; break;
+        case 8: genre_pilihan = "Fantasy"; break;
+        case 9: genre_pilihan = "Drama"; break;
+        case 10: genre_pilihan = "Sports"; break;
+        default: cout << "tidak ada di pilihan" << endl;
+    }
+    
+    cout << "TAMPILAN FILM" <<endl;
+    cout << "===========================================================================" << endl;
+    cout << left
+        << "| " << setw(5)  << "ID"
+        << "| " << setw(35) << "JUDUL"
+        << "| " << setw(18) << "GENRE"
+        << "| " << setw(8)  << "RATING"
+        << "|" << endl;
+    cout << "===========================================================================" << endl;
+
+    if(temp == NULL){
+        cout << "Data Film masih kosong" << endl;
+        return;
+    }
+
+    while (temp != NULL && temp->data.genre == genre_pilihan && temp->data.rating >= rating) {
+        cout << left
+            << "| " << setw(5)  << temp->data.id
+            << "| " << setw(35) << temp->data.judul
+            << "| " << setw(18) << temp->data.genre
+            << "| " << setw(8)  << temp->data.rating
+            << "|" << endl;
+        cout << "---------------------------------------------------------------------------" << endl;
+        temp = temp->next;
+        cek = true;
+    }
+
+    if (!cek){
+        cout << left
+            << setw(14) << " " << "Maaf kami tidak punya rekomendasi yang sesuai" << endl;
+        cout << "---------------------------------------------------------------------------" << endl;
+    }
+}
+
 void bubble_sort(int pilihan){
     Node *i, *j;
     Movie temp;
@@ -514,14 +561,14 @@ void hapus_film(){
 }
 
 void menu_user(){
-    int pilihan, pilih_sort, pilih_asc_dsc;
+    int pilihan, pilih_sort, sort_type, pilih_genre, minimal_rating;
 
     do{
         cout << "\n=== MENU USER ===\n";
         cout << "1. List Film\n";
         cout << "2. Rekomendasi Film\n";
         cout << "3. Watchlist\n";
-        cout << "4. Hapus Film\n";
+        // cout << "4. Hapus Film\n";
         cout << "5. Logout\n";
         cout << "Pilihan: ";
         cin >> pilihan;
@@ -539,18 +586,43 @@ void menu_user(){
             cout << "\n1. Ascending\n";
             cout << "2. Descending\n";
             cout << "Pilihan : ";
-            cin >> pilih_asc_dsc;
+            cin >> sort_type;
             
-            if (pilih_asc_dsc == 1){
+            if (sort_type == 1){
                 bubble_sort(pilih_sort);
                 tampil_film();
-            } else if (pilih_asc_dsc == 2){
+            } else if (sort_type == 2){
                 quickSort(pilih_sort, head, getTail(head));
                 tampil_film();
             } else {
                 cout << "Pilihan tidak valid" << endl;
             }
+        } else if (pilihan == 2){
+            load_data_film();
+
+            cout << "Pilih Genre yang diinginkan : \n";
+            cout << "1. Romance\n";
+            cout << "2. Horror\n";
+            cout << "3. Sci-Fi\n";
+            cout << "4. Action\n";
+            cout << "5. Comedy\n";
+            cout << "6. Adventure\n";
+            cout << "7. Music\n";
+            cout << "8. Fantasy\n";
+            cout << "9. Drama\n";
+            cout << "10. Sports\n";
+            cout << "Pilihan : ";
+            cin >> pilih_genre;
+
+            cout << "Masukkan rating minimal : ";
+            cin >> minimal_rating;
+            
+            rekomendasi_film(pilih_genre, minimal_rating);
+        } else if (pilihan == 3){
+
         }
+        
+        next_menu("selanjutnya");
 
     } while(pilihan != 5 || pilihan < 1 || pilihan > 5);
 }
@@ -609,7 +681,6 @@ void menu_admin(){
 }
 
 int main(){
-    string login_as;
     char punya_akun;
     
     // pilih sebagai user atau admin
@@ -638,12 +709,14 @@ int main(){
         }
 
         // validasi menuju login
+        cout << endl;
         next_menu("login");
+        cout << endl;
 
         // login
         login_user();
 
-        cout << "WELKAM, " << input_username;
+        cout << "WELKAM, '" << input_username << "'" << endl;
         menu_user();
     } else if (login_as == "2"){
 
@@ -658,12 +731,14 @@ int main(){
         }
 
         // validasi menuju menu login
+        cout << endl;
         next_menu("login");
+        cout << endl;
 
         // login
         login_admin();
         
-        cout << "WELKAM, " << input_username;
+        cout << "WELKAM, '" << input_username << "'" << endl;
         menu_admin();
     }
 }
