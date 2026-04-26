@@ -25,17 +25,21 @@ struct Movie {
     string genre;
     float rating;
 };
+
+Movie data_movie[1000];
+
 struct Node {
     Movie data;
     Node* prev;
     Node* next;
 };
 
+
 Node *head = NULL;
 Node *tail = NULL;
 
 string input_username, input_password, login_as;
-int jumlah_data_film = 0;
+int jumlah_data_film;
 
 void menu_admin();
 
@@ -78,7 +82,7 @@ void login_user(){
     char punya_akun;
     head_user = NULL;
     
-    cout << "SILAKAN LOGIN SEBAGAI ADMIN" << endl;
+    cout << "SILAKAN LOGIN SEBAGAI USER" << endl;
     
     FILE *file = fopen("akun_user.txt", "r");
 
@@ -216,6 +220,8 @@ void login_admin(){
 }
 
 void hitung_jumlah_film(){
+    jumlah_data_film = 0;
+        
     FILE *hitung = fopen("movie.txt", "r");
 
     int id;
@@ -228,9 +234,11 @@ void hitung_jumlah_film(){
     }
 
     fclose(hitung);
+    // return jumlah_data_film;
 }
 
 void tambah_film(){
+    // int jumlah_total_film= hitung_jumlah_film();
     hitung_jumlah_film();
 
 	int jumlahfilm;
@@ -292,8 +300,14 @@ void load_data_film(){
     char genre[100];
     float rating;
 
+    int i = 0;
     while(fscanf(load, "%d|%[^|]|%[^|]|%f\n", &id, judul, genre, &rating) != EOF){
         Node *baru = new Node;
+
+        data_movie[i].id = id;
+        data_movie[i].judul = judul;
+        data_movie[i].genre = genre;
+        data_movie[i].rating = rating;
 
         baru->data.id = id;
         baru->data.judul = judul;
@@ -311,13 +325,13 @@ void load_data_film(){
             tail = baru;
 
         }
+        
+        i++;
     }
     fclose(load);
 }
 
 void tampil_film(){
-    hitung_jumlah_film();
-
     Node *temp = head;
     
     cout << "TAMPILAN FILM" <<endl;
@@ -351,7 +365,8 @@ void rekomendasi_film(int pilihan_rekomendasi, float rating){
     hitung_jumlah_film();
     Node *temp = head;
     string genre_pilihan;
-    bool cek = false;
+    // bool cek = false;
+    int i = 0;
 
     switch(pilihan_rekomendasi){
         case 1: genre_pilihan = "Romance"; break;
@@ -382,19 +397,21 @@ void rekomendasi_film(int pilihan_rekomendasi, float rating){
         return;
     }
 
-    while (temp != NULL && temp->data.genre == genre_pilihan && temp->data.rating >= rating) {
-        cout << left
+    while (temp != NULL) {
+        if (temp->data.genre == genre_pilihan && temp->data.rating >= rating){
+            cout << left
             << "| " << setw(5)  << temp->data.id
             << "| " << setw(35) << temp->data.judul
             << "| " << setw(18) << temp->data.genre
             << "| " << setw(8)  << temp->data.rating
             << "|" << endl;
-        cout << "---------------------------------------------------------------------------" << endl;
+            cout << "---------------------------------------------------------------------------" << endl;
+            i++;
+        }
         temp = temp->next;
-        cek = true;
     }
 
-    if (!cek){
+    if (i == 0){
         cout << left
             << setw(14) << " " << "Maaf kami tidak punya rekomendasi yang sesuai" << endl;
         cout << "---------------------------------------------------------------------------" << endl;
@@ -485,6 +502,8 @@ Node* partition(int pilihan_sort, Node* low, Node* high){
         swap(i->data, high->data);
         return i;
     }
+
+    return NULL;
 }
 
 void quickSort(int pilihan_sort, Node* low, Node* high){
@@ -492,6 +511,25 @@ void quickSort(int pilihan_sort, Node* low, Node* high){
         Node* p = partition(pilihan_sort, low, high);
         quickSort(pilihan_sort, low, p->prev);
         quickSort(pilihan_sort, p->next, high);
+    }
+}
+
+int binary_search(int id_film, int i, int j){
+    // i = 0, j = jumlah_data_film;
+    if(i > j){
+        return -1;
+    }
+
+    int tengah = (i + j) / 2;
+    
+    if (id_film == data_movie[tengah].id){
+        return tengah;
+    } else {
+        if (id_film > data_movie[tengah].id){
+            return binary_search(id_film, tengah + 1, j);
+        } else {
+            return binary_search(id_film, i, tengah - 1);
+        }
     }
 }
 
@@ -560,8 +598,44 @@ void hapus_film(){
     cout << "Data berhasil dihapus!\n\n";
 }
 
+void add_watchlist(int id_film){
+    hitung_jumlah_film();
+
+    bool found;
+    Node *baru = head;
+                
+    if (head == NULL){
+        cout << "Gagal";
+        return;
+    }
+    
+    while (baru != NULL){
+        if (baru->data.id == id_film){
+            FILE *file = fopen("watchlist.txt", "a");
+            fprintf(file, "%d|%s|%s|%.1f\n", 
+                baru->data.id, 
+                baru->data.judul.c_str(), 
+                baru->data.genre.c_str(), 
+                baru->data.rating);
+            fclose(file);
+            found = true;
+            break;
+        } 
+        baru = baru->next;
+    }
+
+    if(id_film > (jumlah_data_film + 100)){
+        cout << "YANG BENER AJE LU BANG" << endl;
+    } else if (found) {
+        cout << "ID Film " << id_film << " Berhasil ditambahkan" << endl;
+    } else if (!found){
+        cout << "ID Film " << id_film << " tidak ditemukan di list film" << endl;
+    }
+}
+
 void menu_user(){
-    int pilihan, pilih_sort, sort_type, pilih_genre, minimal_rating;
+    int pilihan, pilih_sort, sort_type, pilih_genre;
+    float minimal_rating;
 
     do{
         cout << "\n=== MENU USER ===\n";
@@ -619,7 +693,51 @@ void menu_user(){
             
             rekomendasi_film(pilih_genre, minimal_rating);
         } else if (pilihan == 3){
+            int tambah_watchlist, id_film;
+            
+            load_data_film();
+            tampil_film();
+            hitung_jumlah_film();
 
+            cout << "\nMau input berapa film ke watchlist : ";
+            cin >> tambah_watchlist;
+            cout << "Pilih ID film yang akan dimasukkan Watchlist ya\n";
+
+            for(int i = 0; i < tambah_watchlist; i++){
+                int awal = 0, akhir = jumlah_data_film - 1;
+                bool cek_duplikat = false;
+
+                cout << "ID Film ke-" << i + 1 << " : ";
+                cin >> id_film;
+
+                FILE *cek = fopen("watchlist.txt", "r");
+
+                if(cek == NULL){
+                    cout << "Ups Watchlist masing kosong" << endl;
+                    return;
+                }
+
+                if(cek != NULL){
+                    int id;
+                    char judul[100], genre[100];
+                    float rating;
+
+                    while(fscanf(cek, "%d|%[^|]|%[^|]|%f\n", &id, judul, genre, &rating) != EOF){
+                        if(id_film == id){
+                            cek_duplikat = true;
+                            break;
+                        }
+                    }
+                }
+                fclose(cek);
+
+                if(cek_duplikat){
+                    cout << "ID " << id_film << " sudah ada di watchlist bang" << endl;
+                    continue;
+                }
+
+                add_watchlist(id_film);
+            }
         }
         
         next_menu("selanjutnya");
