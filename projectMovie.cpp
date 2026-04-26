@@ -26,7 +26,7 @@ struct Movie {
     float rating;
 };
 
-Movie data_movie[1000];
+// Movie data_movie[1000];
 
 struct Node {
     Movie data;
@@ -304,10 +304,10 @@ void load_data_film(){
     while(fscanf(load, "%d|%[^|]|%[^|]|%f\n", &id, judul, genre, &rating) != EOF){
         Node *baru = new Node;
 
-        data_movie[i].id = id;
-        data_movie[i].judul = judul;
-        data_movie[i].genre = genre;
-        data_movie[i].rating = rating;
+        // data_movie[i].id = id;
+        // data_movie[i].judul = judul;
+        // data_movie[i].genre = genre;
+        // data_movie[i].rating = rating;
 
         baru->data.id = id;
         baru->data.judul = judul;
@@ -514,24 +514,24 @@ void quickSort(int pilihan_sort, Node* low, Node* high){
     }
 }
 
-int binary_search(int id_film, int i, int j){
-    // i = 0, j = jumlah_data_film;
-    if(i > j){
-        return -1;
-    }
+// int binary_search(int id_film, int i, int j){
+//     // i = 0, j = jumlah_data_film;
+//     if(i > j){
+//         return -1;
+//     }
 
-    int tengah = (i + j) / 2;
+//     int tengah = (i + j) / 2;
     
-    if (id_film == data_movie[tengah].id){
-        return tengah;
-    } else {
-        if (id_film > data_movie[tengah].id){
-            return binary_search(id_film, tengah + 1, j);
-        } else {
-            return binary_search(id_film, i, tengah - 1);
-        }
-    }
-}
+//     if (id_film == data_movie[tengah].id){
+//         return tengah;
+//     } else {
+//         if (id_film > data_movie[tengah].id){
+//             return binary_search(id_film, tengah + 1, j);
+//         } else {
+//             return binary_search(id_film, i, tengah - 1);
+//         }
+//     }
+// }
 
 void edit_film(){
     int id;
