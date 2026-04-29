@@ -1,7 +1,8 @@
 1|Gurita Hitam|Horror|5.5
-2|Gorila Merah Pekat|Action|4.4
-3|Avengers: The End of World|Sci-fi|9.9
+2|Gurita hitam|romance|3.0
 4|Spiderman: The Way You Are|Action|9.0
 5|Aku sudah punya istri|romance|3.2
 6|Manusia Tanpa Tanda Lahir|Horror|2.3
 7|Tunggu aku sukses nanti|Drama|5.0
+8|Aku Benci Dewasa|Horror|5.8
+9|Iron Man 1|Sci-Fi|10.0
