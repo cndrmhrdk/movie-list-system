@@ -628,6 +628,11 @@ void hapus_film(){
         temp = temp->next;
     }
 
+    if(temp == NULL){
+        cout << "ID film tidak ditemukan" << endl;
+        return;
+    }
+
     if(temp->prev != NULL){
         temp->prev->next = temp->next;
     } else {

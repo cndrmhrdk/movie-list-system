@@ -1,3 +1,4 @@
 candra 123
 akuManusia 223
 lintang 12
+candra 123

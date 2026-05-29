@@ -6,3 +6,4 @@
 7|Tunggu aku sukses nanti|Drama|5.0
 8|Aku Benci Dewasa|Horror|5.8
 9|Iron Man 1|Sci-Fi|10.0
+10|The Martian|Sci-Fi|10.0
